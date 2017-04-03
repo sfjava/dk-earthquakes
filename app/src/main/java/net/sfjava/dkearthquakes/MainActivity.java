@@ -18,7 +18,8 @@ public class MainActivity extends AppCompatActivity {
     private View mProgressView;
     private TextView mMessageTV;
 
-    public static final String EARTHQUAKE_DATA_URL = "http://www.sfjava.net"; // TODO: replace with actual endpoint URL
+    public static final String EARTHQUAKE_DATA_URL
+            = "http://api.geonames.org/earthquakesJSON?formatted=true&north=44.1&south=-9.9&east=-22.4&west=55.2&username=mkoppelman";
     private FetchEarthquakeDataTask mFetchEarthquakeDataTask = null;
 
     @Override
