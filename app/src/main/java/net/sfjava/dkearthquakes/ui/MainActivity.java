@@ -4,9 +4,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import net.sfjava.dkearthquakes.R;
+import net.sfjava.dkearthquakes.model.Earthquake;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -14,10 +19,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private View mProgressView;
+    private LinearLayout mProgressLayout;
     private TextView mMessageTV;
 
     public static final String EARTHQUAKE_DATA_URL
@@ -29,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mProgressView = findViewById(R.id.progress_view);
+        mProgressLayout = (LinearLayout) findViewById(R.id.progress_ll);
         mMessageTV =  (TextView) findViewById(R.id.message_tv);
     }
 
@@ -52,13 +58,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showProgress(final boolean show) {
-        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressLayout.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     /**
      * An asynchronous task used to retrieve the latest Earthquake data from the service endpoint.
      */
-    public class FetchEarthquakeDataTask extends AsyncTask<Void, Void, String> {
+    public class FetchEarthquakeDataTask extends AsyncTask<Void, Void, ArrayList<Earthquake>> {
 
         private final String mEndpointURL;
 
@@ -75,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String doInBackground(Void... params) {
+        protected ArrayList<Earthquake> doInBackground(Void... params) {
 
             // fetch JSON earthquake data from the endpoint URL...
             StringBuilder resultJSON = new StringBuilder();
@@ -98,23 +104,41 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 ; // TODO: handle exceptions properly
             }
-            return resultJSON.toString();
+
+            // now parse the JSON list of all Earthquakes retrieved
+            ArrayList<Earthquake> earthquakesList = new ArrayList<>();
+            if (resultJSON.length() > 0) {
+                try {
+                    JSONObject earthquakesJSON = new JSONObject(resultJSON.toString());
+                    JSONArray earthquakesJSONArray = earthquakesJSON.getJSONArray("earthquakes");
+
+                    earthquakesList.clear(); // clear existing items
+                    earthquakesList.addAll(Earthquake.fromJSON(earthquakesJSONArray)); // add new items
+
+                } catch (Exception e) {
+                ; // TODO: handle exceptions properly
+            }
+            }
+            return earthquakesList;
         }
 
         @Override
-        protected void onPostExecute(final String resultJSON) {
-            super.onPostExecute(resultJSON);
+        protected void onPostExecute(final ArrayList<Earthquake> earthquakesList) {
+            super.onPostExecute(earthquakesList);
 
             mFetchEarthquakeDataTask = null;
             showProgress(false);
 
-            if (resultJSON.length() > 0) {
-                // TODO: populate data-model with (JSON) results retrieved from endpoint URL
+            if (earthquakesList != null) {
+                // OK finally, update UI with the (updated) earthquakes list we received...
                 //
-                mMessageTV.setText(resultJSON); // FIXME: show result JSON in main layout
+                // FIXME: impl using RecyclerView; i.e. update it's Adapter instead
+                StringBuilder sb = new StringBuilder();
+                for(Earthquake earthquake : earthquakesList) {
+                    sb.append(earthquake.getEarthquakeId() + "\n");
+                }
+                mMessageTV.setText(sb.toString());
 
-                // TODO: note that any JSON parsing operation could/should also be done as a background task
-                //
             } else {
                // TODO: show error message in UI since we couldn't fetch (new) data
             }

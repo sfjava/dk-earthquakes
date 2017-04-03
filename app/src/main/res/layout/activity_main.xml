@@ -11,18 +11,36 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="net.sfjava.dkearthquakes.ui.MainActivity">
 
-    <ProgressBar
-        android:id="@+id/progress_view"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone" />
+    <LinearLayout
+        android:id="@+id/progress_ll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/progress_view"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+        <!--<TextView-->
+            <!--android:id="@+id/message_tv"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:textAppearance="@style/TextAppearance.AppCompat.Body1" />-->
+    </LinearLayout>
 
     <TextView
         android:id="@+id/message_tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+    <!--<android.support.v7.widget.RecyclerView-->
+        <!--android:id="@+id/earthquakes_list_rv"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent" />-->
 
 </FrameLayout>
