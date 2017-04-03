@@ -1,10 +1,12 @@
-package net.sfjava.dkearthquakes;
+package net.sfjava.dkearthquakes.ui;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
+
+import net.sfjava.dkearthquakes.R;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
