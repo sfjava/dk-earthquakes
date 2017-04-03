@@ -9,7 +9,7 @@ public class MainActivity extends AppCompatActivity {
 
     private View mProgressView;
 
-    public static final String EARTHQUAKE_DATA_URL = "STATE_CURRENT_PAGE";
+    public static final String EARTHQUAKE_DATA_URL = "http://www.google.com"; // TODO: replace with actual endpoint URL
     private FetchEarthquakeDataTask mFetchEarthquakeDataTask = null;
 
     @Override
