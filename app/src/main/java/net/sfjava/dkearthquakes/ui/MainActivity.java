@@ -3,6 +3,9 @@ package net.sfjava.dkearthquakes.ui;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,11 +27,16 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private LinearLayout mProgressLayout;
-    private TextView mMessageTV;
+    private TextView mProgressMessageTV;
+    private RecyclerView mEarthquakesListRV;
+    private EarthquakesAdapter mEarthquakesAdapter;
 
     public static final String EARTHQUAKE_DATA_URL
             = "http://api.geonames.org/earthquakesJSON?formatted=true&north=44.1&south=-9.9&east=-22.4&west=55.2&username=mkoppelman";
-    private FetchEarthquakeDataTask mFetchEarthquakeDataTask = null;
+    private FetchEarthquakesDataTask mFetchEarthquakesDataTask = null;
+
+    // the current list of earthquakes displayed in the list-view
+    private ArrayList<Earthquake> mEarthquakesList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +44,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mProgressLayout = (LinearLayout) findViewById(R.id.progress_ll);
-        mMessageTV =  (TextView) findViewById(R.id.message_tv);
+        mProgressMessageTV = (TextView) findViewById(R.id.progress_message_tv);
+
+        mEarthquakesListRV = (RecyclerView) findViewById(R.id.earthquakes_list_rv);
+        mEarthquakesAdapter = new EarthquakesAdapter(getApplicationContext(), mEarthquakesList);
+        mEarthquakesListRV.setAdapter(mEarthquakesAdapter);
+        mEarthquakesListRV.setLayoutManager(new LinearLayoutManager(this));
+        RecyclerView.ItemDecoration itemDecoration = new
+                DividerItemDecoration(this, DividerItemDecoration.VERTICAL); // add hairline dividers between rows
+        mEarthquakesListRV.addItemDecoration(itemDecoration);
     }
 
     @Override
@@ -47,28 +63,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void updateEarthquakeData(final String earthquakeDataURL) {
-        if(mFetchEarthquakeDataTask != null) {
+        if(mFetchEarthquakesDataTask != null) {
             return; // skip if we're already running and update task...
         }
-        mFetchEarthquakeDataTask = new FetchEarthquakeDataTask(earthquakeDataURL);
+        mFetchEarthquakesDataTask = new FetchEarthquakesDataTask(earthquakeDataURL);
 
         // kick off a background task to update our earthquake data
-        mFetchEarthquakeDataTask = new FetchEarthquakeDataTask(earthquakeDataURL);
-        mFetchEarthquakeDataTask.execute((Void) null);
+        mFetchEarthquakesDataTask = new FetchEarthquakesDataTask(earthquakeDataURL);
+        mFetchEarthquakesDataTask.execute((Void) null);
     }
 
     private void showProgress(final boolean show) {
+        // show the progress-spinner animation along with an informational message
+        mProgressMessageTV.setText("Fetching Earthquake Data...");
         mProgressLayout.setVisibility(show ? View.VISIBLE : View.GONE);
+
+        // hide the list-view while we're updating...
+        mEarthquakesListRV.setVisibility(!show ? View.VISIBLE : View.GONE);
     }
 
     /**
      * An asynchronous task used to retrieve the latest Earthquake data from the service endpoint.
      */
-    public class FetchEarthquakeDataTask extends AsyncTask<Void, Void, ArrayList<Earthquake>> {
+    public class FetchEarthquakesDataTask extends AsyncTask<Void, Void, ArrayList<Earthquake>> {
 
         private final String mEndpointURL;
 
-        FetchEarthquakeDataTask(String endpointURL) {
+        FetchEarthquakesDataTask(String endpointURL) {
             mEndpointURL = endpointURL;
         }
 
@@ -76,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
 
-            mMessageTV.setText("Fetching Earthquake Data...");
             showProgress(true); // show a progress spinner...
         }
 
@@ -106,14 +126,13 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // now parse the JSON list of all Earthquakes retrieved
-            ArrayList<Earthquake> earthquakesList = new ArrayList<>();
+            ArrayList<Earthquake> earthquakesList = null; // new ArrayList<>();
             if (resultJSON.length() > 0) {
                 try {
                     JSONObject earthquakesJSON = new JSONObject(resultJSON.toString());
                     JSONArray earthquakesJSONArray = earthquakesJSON.getJSONArray("earthquakes");
 
-                    earthquakesList.clear(); // clear existing items
-                    earthquakesList.addAll(Earthquake.fromJSON(earthquakesJSONArray)); // add new items
+                    earthquakesList = Earthquake.fromJSON(earthquakesJSONArray);
 
                 } catch (Exception e) {
                 ; // TODO: handle exceptions properly
@@ -126,18 +145,15 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(final ArrayList<Earthquake> earthquakesList) {
             super.onPostExecute(earthquakesList);
 
-            mFetchEarthquakeDataTask = null;
+            mFetchEarthquakesDataTask = null;
             showProgress(false);
 
             if (earthquakesList != null) {
                 // OK finally, update UI with the (updated) earthquakes list we received...
                 //
-                // FIXME: impl using RecyclerView; i.e. update it's Adapter instead
-                StringBuilder sb = new StringBuilder();
-                for(Earthquake earthquake : earthquakesList) {
-                    sb.append(earthquake.getEarthquakeId() + "\n");
-                }
-                mMessageTV.setText(sb.toString());
+                mEarthquakesList.clear();
+                mEarthquakesList.addAll(earthquakesList);
+                mEarthquakesAdapter.notifyDataSetChanged();
 
             } else {
                // TODO: show error message in UI since we couldn't fetch (new) data
@@ -146,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onCancelled() {
-            mFetchEarthquakeDataTask = null;
+            mFetchEarthquakesDataTask = null;
             showProgress(false);
         }
     }
