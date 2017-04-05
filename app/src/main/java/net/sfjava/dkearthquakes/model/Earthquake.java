@@ -4,7 +4,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Data model object for a (single) Earthquake event.
@@ -12,12 +16,12 @@ import java.util.ArrayList;
 public class Earthquake {
 
     private String earthquakeId;
-    private String datetimeStr;
+    private Date datetime;
 
     private float depth;
     private float magnitude;
-    private float latitude;
-    private float longitude;
+    private double latitude;
+    private double longitude;
 
     private String sourceCountryCode;
 
@@ -28,9 +32,8 @@ public class Earthquake {
         return earthquakeId;
     }
 
-    public long getDatetime() {
-        // return datetimeStr;
-        return System.currentTimeMillis(); // FIXME
+    public Date getDatetime() {
+        return datetime;
     }
 
     public float getDepth() {
@@ -41,11 +44,11 @@ public class Earthquake {
         return magnitude;
     }
 
-    public float getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public float getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
@@ -76,11 +79,24 @@ public class Earthquake {
 
         // deserialize JSON into object fields...
         try {
+            String datetimeStr = earthquakeJSON.getString("datetime");
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                Date date = sdf.parse(datetimeStr);
+                e.datetime = date;
+
+            } catch (ParseException e1) {
+                // TODO: handle exception when parsing date/time field
+            }
+
             e.earthquakeId = earthquakeJSON.getString("eqid");
             e.magnitude = (float) earthquakeJSON.getDouble("magnitude");
-            //
-            // TODO: finish impl for all other JSON fields
-            //
+            e.depth = (float) earthquakeJSON.getDouble("depth");
+            e.latitude = earthquakeJSON.getDouble("lat");
+            e.longitude = earthquakeJSON.getDouble("lng");
+            e.sourceCountryCode = earthquakeJSON.getString("src");
+
         } catch (JSONException ex) {
             return null;
         }

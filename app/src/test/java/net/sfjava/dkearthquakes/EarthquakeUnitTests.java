@@ -5,6 +5,11 @@ import net.sfjava.dkearthquakes.model.Earthquake;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -26,7 +31,17 @@ public class EarthquakeUnitTests {
 
         Earthquake testEarthquake = Earthquake.fromJSON(new JSONObject(testEarthquakeJSON));
         assertEquals("c0001xgp", testEarthquake.getEarthquakeId());
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.clear(); // CAVEAT: we *must* clear the millisecs field in order to match date-time in example
+        calendar.set(2011, 02, 11, 04, 46, 23); // CAVEAT: note MM field is *zero* based (i.e. 0 = Jan)
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        assertEquals(calendar.getTime().getTime(), testEarthquake.getDatetime().getTime());
+
         assertEquals(8.8f, testEarthquake.getMagnitude(), 0.001);
-        // TODO: test all other object fields...
+        assertEquals(24.4f, testEarthquake.getDepth(), 0.001);
+        assertEquals(38.322d, testEarthquake.getLatitude(), 0.0001);
+        assertEquals(142.369d, testEarthquake.getLongitude(), 0.0001);
+        assertEquals("us", testEarthquake.getSourceCountryCode());
     }
 }

@@ -15,6 +15,8 @@ import android.widget.TextView;
 import net.sfjava.dkearthquakes.R;
 import net.sfjava.dkearthquakes.model.Earthquake;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -37,6 +39,10 @@ public class EarthquakesAdapter extends RecyclerView.Adapter<EarthquakesAdapter.
         public TextView earthquakeIdTV;
         public TextView magnitudeTV;
         public ProgressBar magnitudePB;
+        public TextView depthTV;
+        public TextView latitudeTV;
+        public TextView longitudeTV;
+        public TextView datetimeTV;
 
         // note view-holder constructor accepts the entire item row and does the view lookups to find each subview
         public ViewHolder(View itemView) {
@@ -45,6 +51,10 @@ public class EarthquakesAdapter extends RecyclerView.Adapter<EarthquakesAdapter.
             earthquakeIdTV = (TextView) itemView.findViewById(R.id.earthquake_id_tv);
             magnitudeTV = (TextView) itemView.findViewById(R.id.magnitude_tv);
             magnitudePB = (ProgressBar) itemView.findViewById(R.id.magnitude_pb);
+            depthTV = (TextView) itemView.findViewById(R.id.depth_tv);
+            latitudeTV = (TextView) itemView.findViewById(R.id.latitude_tv);
+            longitudeTV = (TextView) itemView.findViewById(R.id.longitude_tv);
+            datetimeTV = (TextView) itemView.findViewById(R.id.datetime_tv);
         }
     }
 
@@ -80,6 +90,13 @@ public class EarthquakesAdapter extends RecyclerView.Adapter<EarthquakesAdapter.
         } else {
             progressDrawable.setColorFilter(Color.rgb(96, 192, 192), PorterDuff.Mode.SRC_IN);
         }
+
+        vh.depthTV.setText(Float.toString(quake.getDepth()));
+        vh.latitudeTV.setText(Double.toString(quake.getLatitude()));
+        vh.longitudeTV.setText(Double.toString(quake.getLongitude()));
+
+        String localDateTime = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(quake.getDatetime());
+        vh.datetimeTV.setText(localDateTime);
     }
 
     // returns the total count of items in the list
