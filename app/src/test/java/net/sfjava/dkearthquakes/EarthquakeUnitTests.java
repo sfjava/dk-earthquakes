@@ -26,6 +26,7 @@ public class EarthquakeUnitTests {
 
         Earthquake testEarthquake = Earthquake.fromJSON(new JSONObject(testEarthquakeJSON));
         assertEquals("c0001xgp", testEarthquake.getEarthquakeId());
+        assertEquals(8.8f, testEarthquake.getMagnitude(), 0.001);
         // TODO: test all other object fields...
     }
 }

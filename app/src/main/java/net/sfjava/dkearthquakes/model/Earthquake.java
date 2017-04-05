@@ -77,7 +77,8 @@ public class Earthquake {
         // deserialize JSON into object fields...
         try {
             e.earthquakeId = earthquakeJSON.getString("eqid");
-
+            e.magnitude = (float) earthquakeJSON.getDouble("magnitude");
+            //
             // TODO: finish impl for all other JSON fields
             //
         } catch (JSONException ex) {
