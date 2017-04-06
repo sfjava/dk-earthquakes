@@ -90,6 +90,7 @@ public class EarthquakesAdapter extends RecyclerView.Adapter<EarthquakesAdapter.
         } else {
             progressDrawable.setColorFilter(Color.rgb(96, 192, 192), PorterDuff.Mode.SRC_IN);
         }
+        vh.magnitudePB.setTag(quake.getEarthquakeId()); // set this tag for use in Espresso tests
 
         vh.depthTV.setText(Float.toString(quake.getDepth()));
         vh.latitudeTV.setText(Double.toString(quake.getLatitude()));
